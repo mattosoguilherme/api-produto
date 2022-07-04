@@ -1,1 +1,34 @@
-version:'3'
+version: '3'
+
+networks:
+  rede-docker:
+    driver: bridge
+
+volumes:
+  mongo-vol:
+
+services:
+  mdb:
+    image: mongo:4.4.6
+    volumes:
+      - "mongo-vol:/data/db"
+    ports:
+      - "27017:27017"
+    networks:
+      - "rede-docker"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongouser
+      - MONGO_INITDB_ROOT_PASSWORD=mongopwd
+  api-produto:
+    image: oliveirafull/api-produto:v2
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - "rede-docker"
+    environment:
+      - MONGODB_URI=mongodb://mongouser:mongopwd@mdb:27017/admin
+    depends_on:
+      - "mdb"
